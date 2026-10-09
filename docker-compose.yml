@@ -1,0 +1,40 @@
+# RocketMQ 本地开发环境（单 NameServer + 单 Broker）
+# 用法：
+#   cd rocketmq-demo
+#   docker compose up -d
+#   docker compose logs broker | grep -i "boot success"   # 看到 boot success 即起好
+# 停止：docker compose down
+#
+# 镜像说明：默认用官方 apache/rocketmq:5.3.0。
+# 若你的 Docker 镜像源（如某些云镜像）代理不到 apache/rocketmq（拉取 403），
+# 可把两处 image 改为 rocketmqinc/rocketmq:5.3.0（同内部布局，mqbroker 在 PATH，broker.conf 挂载不变）。
+
+services:
+  namesrv:
+    image: apache/rocketmq:5.3.0
+    container_name: rmqnamesrv
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
+    healthcheck:
+      # 镜像无关：仅探测 9876 端口是否可连（需容器内 bash 支持 /dev/tcp）
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9876' && echo ok || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  broker:
+    image: apache/rocketmq:5.3.0
+    container_name: rmqbroker
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    environment:
+      JAVA_OPT: "-Xms512m -Xmx512m"
+    volumes:
+      - ./docker/broker.conf:/etc/rocketmq/broker.conf:ro
+    command: sh mqbroker -c /etc/rocketmq/broker.conf
+    depends_on:
+      namesrv:
+        condition: service_started
