@@ -21,15 +21,27 @@ public class Day06BroadcastTest {
         AtomicInteger inst1 = new AtomicInteger();
         AtomicInteger inst2 = new AtomicInteger();
         CountDownLatch latch = new CountDownLatch(2);
+        // 唯一 key：消费端按 keys 过滤，只统计本次消息，避免历史消息干扰
+        String key = "k1-" + System.nanoTime();
 
         BroadcastService c1 = new BroadcastService("day06-broadcast-" + System.nanoTime(), topic,
-                (MessageExt m) -> { inst1.incrementAndGet(); latch.countDown(); });
+                (MessageExt m) -> {
+                    if (key.equals(m.getKeys())) {
+                        inst1.incrementAndGet();
+                        latch.countDown();
+                    }
+                });
         BroadcastService c2 = new BroadcastService("day06-broadcast-" + System.nanoTime(), topic,
-                (MessageExt m) -> { inst2.incrementAndGet(); latch.countDown(); });
+                (MessageExt m) -> {
+                    if (key.equals(m.getKeys())) {
+                        inst2.incrementAndGet();
+                        latch.countDown();
+                    }
+                });
 
         SyncProducerService producer = new SyncProducerService("day06-producer");
         try {
-            producer.send(topic, "evt", "k1", "refresh-cache");
+            producer.send(topic, "evt", key, "refresh-cache");
             boolean done = latch.await(15, TimeUnit.SECONDS);
             assertTrue(done);
             assertTrue(inst1.get() >= 1 && inst2.get() >= 1, "广播模式下两个实例都应收到消息");

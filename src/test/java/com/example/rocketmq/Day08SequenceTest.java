@@ -24,6 +24,8 @@ public class Day08SequenceTest {
     @Test
     void sameOrderStatusKeptInOrder() throws Exception {
         String topic = "TopicDay08";
+        // 唯一订单号：消费端按 keys 过滤，只收本次消息，避免历史消息干扰顺序断言
+        String orderId = "ORDER-2001-" + System.nanoTime();
         List<String> seq = Collections.synchronizedList(new ArrayList<>());
         CountDownLatch latch = new CountDownLatch(3);
 
@@ -33,8 +35,10 @@ public class Day08SequenceTest {
         consumer.subscribe(topic, "*");
         consumer.registerMessageListener((MessageListenerOrderly) (msgs, context) -> {
             for (MessageExt m : msgs) {
-                seq.add(new String(m.getBody(), StandardCharsets.UTF_8));
-                latch.countDown();
+                if (orderId.equals(m.getKeys())) {
+                    seq.add(new String(m.getBody(), StandardCharsets.UTF_8));
+                    latch.countDown();
+                }
             }
             return ConsumeOrderlyStatus.SUCCESS;
         });
@@ -42,17 +46,17 @@ public class Day08SequenceTest {
 
         OrderSequenceService svc = new OrderSequenceService("day08-producer");
         try {
-            String orderId = "ORDER-2001";
             svc.sendOrderEvent(topic, orderId, "CREATED");
             svc.sendOrderEvent(topic, orderId, "PAID");
             svc.sendOrderEvent(topic, orderId, "SHIPPED");
 
+            List<String> expected = List.of(
+                    orderId + ":CREATED", orderId + ":PAID", orderId + ":SHIPPED");
             assertTrue(latch.await(15, TimeUnit.SECONDS));
-            assertEquals(List.of("ORDER-2001:CREATED", "ORDER-2001:PAID", "ORDER-2001:SHIPPED"), seq);
+            assertEquals(expected, seq);
             System.out.println("[Day08] orderId=" + orderId
                     + ", sequence=" + seq
-                    + ", inOrder=" + seq.equals(List.of(
-                            "ORDER-2001:CREATED", "ORDER-2001:PAID", "ORDER-2001:SHIPPED")));
+                    + ", inOrder=" + seq.equals(expected));
         } finally {
             svc.close();
             consumer.shutdown();
