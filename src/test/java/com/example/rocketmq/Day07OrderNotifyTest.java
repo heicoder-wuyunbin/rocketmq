@@ -33,6 +33,10 @@ public class Day07OrderNotifyTest {
             boolean done = latch.await(15, TimeUnit.SECONDS);
             assertTrue(done);
             assertTrue(notify.get() >= 1 && audit.get() >= 1, "短信通知与审计日志都应被独立消费");
+            System.out.println("[Day07] orderId=ORDER-1001, userId=U-888"
+                    + ", notifyCount=" + notify.get()
+                    + ", auditCount=" + audit.get()
+                    + ", bothConsumed=" + (notify.get() >= 1 && audit.get() >= 1));
         } finally {
             svc.close();
             cNotify.close();

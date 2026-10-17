@@ -49,6 +49,10 @@ public class Day08SequenceTest {
 
             assertTrue(latch.await(15, TimeUnit.SECONDS));
             assertEquals(List.of("ORDER-2001:CREATED", "ORDER-2001:PAID", "ORDER-2001:SHIPPED"), seq);
+            System.out.println("[Day08] orderId=" + orderId
+                    + ", sequence=" + seq
+                    + ", inOrder=" + seq.equals(List.of(
+                            "ORDER-2001:CREATED", "ORDER-2001:PAID", "ORDER-2001:SHIPPED")));
         } finally {
             svc.close();
             consumer.shutdown();

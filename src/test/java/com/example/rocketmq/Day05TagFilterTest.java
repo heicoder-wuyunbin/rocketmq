@@ -37,6 +37,8 @@ public class Day05TagFilterTest {
             boolean done = latch.await(15, TimeUnit.SECONDS);
             assertTrue(done, "应只收到 tagA/tagB 两条");
             assertTrue(got.contains("tagA") && got.contains("tagB"));
+            System.out.println("[Day05] subscribed=tagA || tagB, receivedTags=" + got
+                    + ", tagCFilteredOut=" + !got.contains("tagC"));
         } finally {
             producer.close();
             consumer.close();

@@ -29,5 +29,9 @@ public class Day12TransactionTest {
                 TransactionOrderService.decideByLocalLog(true));
         assertEquals(LocalTransactionState.ROLLBACK_MESSAGE,
                 TransactionOrderService.decideByLocalLog(false));
+        System.out.println("[Day12] localLogSuccess=true  -> state=" + TransactionOrderService.decideByLocalLog(true)
+                + " (提交消息)");
+        System.out.println("[Day12] localLogSuccess=false -> state=" + TransactionOrderService.decideByLocalLog(false)
+                + " (回滚消息)");
     }
 }

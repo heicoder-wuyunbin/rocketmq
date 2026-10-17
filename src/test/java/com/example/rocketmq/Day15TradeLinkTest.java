@@ -11,9 +11,16 @@ public class Day15TradeLinkTest {
     void tradeLinkComposesIdempotentAndDelay() {
         TradeLinkService svc = new TradeLinkService();
         // 加积分幂等：首次生效，重复忽略
-        assertEquals("scored:100", svc.applyScore("ORDER-9001", 100));
-        assertEquals("ignored:duplicate", svc.applyScore("ORDER-9001", 100));
+        String first = svc.applyScore("ORDER-9001", 100);
+        String duplicate = svc.applyScore("ORDER-9001", 100);
         // 关单走延迟消息等级 16
-        assertEquals(16, svc.closeOrderDelayLevel());
+        int level = svc.closeOrderDelayLevel();
+        assertEquals("scored:100", first);
+        assertEquals("ignored:duplicate", duplicate);
+        assertEquals(16, level);
+        System.out.println("[Day15] orderId=ORDER-9001"
+                + ", firstApplyScore=" + first
+                + ", duplicateApplyScore=" + duplicate
+                + ", closeOrderDelayLevel=" + level);
     }
 }

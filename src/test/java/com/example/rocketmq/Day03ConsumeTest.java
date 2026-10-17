@@ -32,6 +32,9 @@ public class Day03ConsumeTest {
             boolean got = latch.await(15, TimeUnit.SECONDS);
             assertTrue(got, "消费者应在 15s 内收到消息（确认 Broker 已启动）");
             assertEquals("hello-consumer", received[0]);
+            System.out.println("[Day03] topic=" + topic
+                    + ", received=" + received[0]
+                    + ", consumedWithin15s=" + got);
         } finally {
             producer.close();
             consumer.close();

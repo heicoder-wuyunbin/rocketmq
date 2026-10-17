@@ -15,12 +15,19 @@ public class Day13BacklogTest {
         assertEquals(500, instances);
         long secs = BacklogHandlerService.estimateClearSeconds(1_000_000, 500, 2000);
         assertTrue(secs <= 1, "实例足够时应秒级清空");
+        System.out.println("[Day13] backlog=1,000,000, tpsPerInstance=2000"
+                + ", recommendedInstances=" + instances
+                + ", clearSeconds=" + secs);
     }
 
     @Test
     void consumeThreadsBoundedByQueue() {
         // 队列 4 个 → 线程建议不超过 4（多了空转）
-        assertEquals(4, BacklogHandlerService.recommendConsumeThreads(4));
-        assertEquals(1, BacklogHandlerService.recommendConsumeThreads(0));
+        int threadsFor4 = BacklogHandlerService.recommendConsumeThreads(4);
+        int threadsFor0 = BacklogHandlerService.recommendConsumeThreads(0);
+        assertEquals(4, threadsFor4);
+        assertEquals(1, threadsFor0);
+        System.out.println("[Day13] queues=4 -> recommendThreads=" + threadsFor4
+                + "; queues=0 -> recommendThreads=" + threadsFor0);
     }
 }

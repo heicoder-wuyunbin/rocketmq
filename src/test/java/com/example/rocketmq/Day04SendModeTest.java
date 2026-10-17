@@ -32,8 +32,14 @@ public class Day04SendModeTest {
                     latch.countDown();
                 }
             });
-            assertTrue(latch.await(15, TimeUnit.SECONDS), "异步回调应在 15s 内触发");
+            boolean done = latch.await(15, TimeUnit.SECONDS);
+            assertTrue(done, "异步回调应在 15s 内触发");
             assertNotNull(ref.get());
+            SendResult r = ref.get();
+            System.out.println("[Day04][async] callbackFired=" + done
+                    + ", sendStatus=" + r.getSendStatus()
+                    + ", msgId=" + r.getMsgId()
+                    + ", offsetMsgId=" + r.getOffsetMsgId());
         } finally {
             svc.close();
         }
@@ -45,6 +51,7 @@ public class Day04SendModeTest {
         try {
             // 单向发送无返回值，只保证发出去，用于日志等可丢场景
             svc.onewaySend("TopicDay04", "tagB", "log-line");
+            System.out.println("[Day04][oneway] sent topic=TopicDay04, tag=tagB, body=log-line (no ack)");
         } finally {
             svc.close();
         }

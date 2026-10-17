@@ -33,6 +33,10 @@ public class Day06BroadcastTest {
             boolean done = latch.await(15, TimeUnit.SECONDS);
             assertTrue(done);
             assertTrue(inst1.get() >= 1 && inst2.get() >= 1, "广播模式下两个实例都应收到消息");
+            System.out.println("[Day06] topic=" + topic
+                    + ", inst1Count=" + inst1.get()
+                    + ", inst2Count=" + inst2.get()
+                    + ", bothReceived=" + (inst1.get() >= 1 && inst2.get() >= 1));
         } finally {
             producer.close();
             c1.close();

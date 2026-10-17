@@ -41,6 +41,9 @@ public class Day10BatchFilterTest {
 
         boolean done = latch.await(15, TimeUnit.SECONDS);
         assertTrue(done, "VIP 消息应被 SQL 过滤消费到");
+        System.out.println("[Day10] sentNormal=3, sentVip=1, sqlFilter=\"vip = 'true'\""
+                + ", vipConsumedCount=" + vipCount.get()
+                + ", normalFilteredOut=" + (vipCount.get() == 1));
 
         batch.close();
         prod.close();
